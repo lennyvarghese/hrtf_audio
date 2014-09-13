@@ -56,9 +56,9 @@ if __name__ == '__main__':
     for a in azimuthVal:
 
         if a < 0:
-            aStr = '{:.4f}'.format(a).replace('.', 'p').replace('-', 'neg')
+            aStr = '{:.1f}'.format(a).replace('.', 'p').replace('-', 'neg')
         elif a > 0:
-            aStr = 'pos' + '{:.4f}'.format(a).replace('.', 'p')
+            aStr = 'pos' + '{:.1f}'.format(a).replace('.', 'p')
         else:
             aStr = 'center'
 
@@ -73,7 +73,7 @@ if __name__ == '__main__':
         tempFile.write('nchnls = 2\n')
 
         tempFile.write('instr 1\n')
-        tempFile.write('ain soundin "' + monoFilename + '"\n')
+        tempFile.write('ain soundin "' + os.path.join(wavDir, monoFilename) + '"\n')
         # calls hrtfmove in csound
         tempFile.write('aleft,aright hrtfmove ain, ')
         # with azimuth a
