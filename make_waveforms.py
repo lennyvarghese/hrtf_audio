@@ -27,6 +27,17 @@ def clicktrain(duration=DURATION, f0=F0, sampleRate=SAMPLERATE):
 
     return scale_rms(audioOut)
 
+def click(duration=DURATION, sampleRate = SAMPLERATE):
+    '''
+    Generate a single impulse at t = 0
+    '''
+
+    x = np.zeros(duration*sampleRate, dtype = float)
+
+    x[0] = 1.0
+
+    return x
+
 
 def sawtooth(duration=DURATION, f0=F0, sampleRate=SAMPLERATE, N=64):
     '''
@@ -76,7 +87,12 @@ def scale_rms(audio):
     you don't really want to do this if nchan > 1
 
     """
+    return audio / get_rms(audio)
 
-    audioOut = audio / (np.sqrt((audio ** 2.0).mean(axis=0)))
 
-    return audioOut
+def get_rms(audio):
+    """
+    computes rms down the first axis
+    """
+
+    return np.sqrt((audio ** 2.0).mean(axis=0))
