@@ -120,9 +120,9 @@ def get_itd(audioInput, sampleRate, normalize=False):
         leftSignal = scale_rms(leftSignal)
         rightSignal = scale_rms(rightSignal)
 
-    q = signal.correlate(leftSignal, rightSignal, 'full')
+    q = signal.correlate(rightSignal, leftSignal, 'full')
 
-    lagSamples = len(q) - len(leftSignal) - np.argmax(q)
+    lagSamples = len(q) - len(rightSignal) - np.argmax(q)
 
     return lagSamples / float(sampleRate)
 
@@ -130,7 +130,7 @@ def get_itd(audioInput, sampleRate, normalize=False):
 def get_ild(audioInput):
     '''
     computes ild
-    returns db re: left ear signal
+    returns ild in db (right signal relative to left signal)
     '''
     assert audioInput.shape[1] == 2
 
@@ -140,4 +140,4 @@ def get_ild(audioInput):
     leftSignalRMS = get_rms(leftSignal)
     rightSignalRMS = get_rms(rightSignal)
 
-    return 20*np.log10(leftSignalRMS/rightSignalRMS)
+    return 20*np.log10(rightSignalRMS/leftSignalRMS)
