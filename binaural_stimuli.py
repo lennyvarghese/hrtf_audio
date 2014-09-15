@@ -35,7 +35,7 @@ import numpy as np
 import os
 import errno
 import sys
-import make_waveforms
+import audio_tools
 from scikits import audiolab
 
 wavFileList = []
@@ -49,13 +49,13 @@ else:
 
 theTimbre = timbre.lower()
 if theTimbre == 'sawtooth':
-    audioOut = make_waveforms.sawtooth(dur + 1, f0, 44100)
+    audioOut = audio_tools.sawtooth(dur + 1, f0, 44100)
 elif theTimbre == 'puretone':
-    audioOut = make_waveforms.puretone(dur + 1, f0, 44100)
+    audioOut = audio_tools.puretone(dur + 1, f0, 44100)
 elif theTimbre == 'clicktrain':
-    audioOut = make_waveforms.clicktrain(dur + 1, f0, 44100)
+    audioOut = audio_tools.clicktrain(dur + 1, f0, 44100)
 elif theTimbre == 'impulse':
-    audioOut = make_waveforms.click(dur+1, 44100)
+    audioOut = audio_tools.impulse(dur+1, 44100)
 
 audioOut = audioOut / max(abs(audioOut))
 
@@ -73,17 +73,21 @@ else:
 
 audiolab.wavwrite(audioOut, os.path.join(wavDir, monoFilename), 44100)
 
-# span -90 to 90 in 0.1 degree increments
-# generate right side first
-azimuthVal = np.linspace(0.0, 90.0, 901, endpoint=True)
 
-for a in azimuthVal:
-    if a > 0:
-        aStr = 'pos' + '{:.1f}'.format(a).replace('.', 'p')
+# span -90 to 90 in 0.1 degree increments
+# generate right side first then flip everything later
+azimuthVals = np.linspace(0.0, 90.0, 901, endpoint=True)
+
+
+for a in range(len(azimuthVals)):
+    if azimuthVals[a] > 0:
+        aStr = 'pos' + '{:.1f}'.format(azimuthVals[a]).replace('.', 'p')
     else:
         aStr = '0'
 
     wavFileList.append(os.path.join(wavDir, aStr + '_' + monoFilename))
+
+    # generate the csound .csd
 
     tempFile = open('tempCSD_' + aStr + '.csd', 'w')
     tempFile.write('<CsoundSynthesizer>\n')
@@ -100,7 +104,7 @@ for a in azimuthVal:
     # calls hrtfmove in csound
     tempFile.write('aleft,aright hrtfmove ain, ')
     # with azimuth a degrees
-    tempFile.write('{},'.format(a))
+    tempFile.write('{},'.format(azimuthVals[a]))
     # with elevation 0
     tempFile.write('0,')
     # interpolate using the hrtf data files specified below **
@@ -124,6 +128,8 @@ for a in azimuthVal:
     os.system('csound tempCSD_' + aStr + '.csd && ' +
               'rm tempCSD_' + aStr + '.csd')
 
+# open everyhting just generated, and obtain the maximum value across all
+# tokens and channels
 maxVals = []
 for x in wavFileList:
     audioData, _, _ = audiolab.wavread(x)
@@ -131,12 +137,29 @@ for x in wavFileList:
 
 scaler = max(maxVals) + 0.0000001
 
-for x in wavFileList:
-    audioData, fs, enc = audiolab.wavread(x)
-    audiolab.wavwrite(audioData/scaler, x, fs, enc)
+# scale everything so that the max value across the entire set of tokens is ~1.
+# Also estimate the ITD and ILD from the stimuli and write these to a csv file.
+outputInfo = open(os.path.join(wavDir,
+                               monoFilename.replace('.wav', '_info.csv')), 'w')
+printStr = '{},{},{},{}\n'
+outputInfo.write(printStr.format('filename', 'azimuth', 'itd', 'ild'))
+
+for x in range(len(wavFileList)):
+
+    audioData, fs, enc = audiolab.wavread(wavFileList[x])
+
+    azimuth = azimuthVals[x]
+    itdVal = audio_tools.get_itd(audioData, fs)
+    ildVal = audio_tools.get_ild(audioData)
+
+    audiolab.wavwrite(audioData/scaler, wavFileList[x], fs, enc)
 
     # reverse to get left side
-    if 'pos' in x:
-        xsp = x.split('pos')
-        y = xsp[0] + 'neg' + xsp[1]
-        audiolab.wavwrite(np.fliplr(audioData/scaler), y, fs, enc)
+    if 'pos' in wavFileList[x]:
+        xsp = wavFileList[x].split('pos')
+        leftFilename = xsp[0] + 'neg' + xsp[1]
+        audiolab.wavwrite(np.fliplr(audioData/scaler), leftFilename, fs, enc)
+
+    outputInfo.write(printStr.format(wavFileList[x], azimuth, itdVal, ildVal))
+
+outputInfo.close()

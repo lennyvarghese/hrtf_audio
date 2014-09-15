@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import signal
 
 SAMPLERATE = 44100
 DURATION = 0.100
@@ -27,12 +28,14 @@ def clicktrain(duration=DURATION, f0=F0, sampleRate=SAMPLERATE):
 
     return scale_rms(audioOut)
 
-def click(duration=DURATION, sampleRate = SAMPLERATE):
+
+def impulse(duration=DURATION, sampleRate=SAMPLERATE):
     '''
-    Generate a single impulse at t = 0
+    Generate a single impulse (x = 1) at t = 0, with zeros afterwards specified
+    by duration
     '''
 
-    x = np.zeros(duration*sampleRate, dtype = float)
+    x = np.zeros(duration*sampleRate, dtype=float)
 
     x[0] = 1.0
 
@@ -96,3 +99,45 @@ def get_rms(audio):
     """
 
     return np.sqrt((audio ** 2.0).mean(axis=0))
+
+
+# binaural functions
+
+
+def get_itd(audioInput, sampleRate, normalize=False):
+
+    '''
+    computes itd by cross-correlating left and right channels.
+    negative lag indicates left-ear leads
+    '''
+
+    assert audioInput.shape[1] == 2
+
+    leftSignal = audioInput[:, 0]
+    rightSignal = audioInput[:, 1]
+
+    if normalize:
+        leftSignal = scale_rms(leftSignal)
+        rightSignal = scale_rms(rightSignal)
+
+    q = signal.correlate(leftSignal, rightSignal, 'full')
+
+    lagSamples = len(q) - len(leftSignal) - np.argmax(q)
+
+    return lagSamples / float(sampleRate)
+
+
+def get_ild(audioInput):
+    '''
+    computes ild
+    returns db re: left ear signal
+    '''
+    assert audioInput.shape[1] == 2
+
+    leftSignal = audioInput[:, 0]
+    rightSignal = audioInput[:, 1]
+
+    leftSignalRMS = get_rms(leftSignal)
+    rightSignalRMS = get_rms(rightSignal)
+
+    return 20*np.log10(leftSignalRMS/rightSignalRMS)
