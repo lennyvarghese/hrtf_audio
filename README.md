@@ -8,10 +8,15 @@ dependencies:
 
 usage: 
 ```
-python clicktrain_hrtf.py f0 duration
+python binaural_stimuli.py timbre duration f0
 ```
 
-where "f0" is in Hz and "duration" is in seconds, will generate spatialized
-click trains in the processedWavs folder.  There will be individual wav files
-for azimuth -90 to +90 degrees, with 0.1 degree spacing, all at elevation 0
-degrees.
+"timbre" is one of [impulse, clicktrain, puretone, sawtooth]
+
+"f0" is the fundamental frequency in Hz (for clicktrain, puretone, sawtooth)
+
+"duration" is in seconds
+
+will generate spatialized click trains in the processedWavs folder.  There will
+be individual wav files for azimuth -90 to +90 degrees, with 0.1 degree
+spacing, all at 0 degree elevation.
