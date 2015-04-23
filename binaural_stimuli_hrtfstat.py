@@ -72,7 +72,7 @@ elif theTimbre == 'noise':
 audioOut = audioOut / max(abs(audioOut))
 
 # 'wav' file directory to save everything to
-wavDir = 'processedWavs_' + theTimbre
+wavDir = 'processedWavs'
 
 #Output Sound file
 try:
