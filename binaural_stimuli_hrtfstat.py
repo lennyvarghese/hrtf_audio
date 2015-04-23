@@ -40,7 +40,7 @@ from audio_tools import *
 from scikits import audiolab
 
 wavFileList = []
-Fs = 96000
+Fs = 44100
 
 
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -106,7 +106,7 @@ CSoundCode = '''<CsoundSynthesizer>
 				nchnls = 2
 				instr 1
 				ain soundin "%s"
-				aleft,aright hrtfstat ain, %s, 0, "hrtf-96000-left.dat", "hrtf-96000-right.dat"
+				aleft,aright hrtfstat ain, %s, 0, "hrtf-44100-left.dat", "hrtf-44100-right.dat"
 				outs    aleft, aright
 				endin
 			</CsInstruments>
