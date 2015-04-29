@@ -20,23 +20,47 @@ Dependencies
 
 Usage
 -------------
-    python make_binaural.py SAMPLERATE TIMBRE DURATION [f0] [headrad]
+```python make_binaural.py SAMPLERATE TIMBRE DURATION [f0] [headrad] [wav]```
 
-    SAMPLERATE: must be 44100, 48000, 96000
+SAMPLERATE: must be 44100, 48000, 96000
 
-    TIMBRE: impulse, click, clicktrain, puretone, or sawtooth
+TIMBRE: impulse, click, clicktrain, puretone, sawtooth, or custom. If
+    custom, the last argument must be specified and point to the wav file
+    to be interpolated.
 
-    DURATION: duration in seconds. For clicks and impulses, this defines the
-        total length of the wav file and not the clicks themselves. The clicks
-        are always 80 microseconds in duration. When "impulse" is selected, a
-        single sample is set to 1 (i.e., 1/Fs in duration).
+DURATION: duration in seconds. For clicks and impulses, this defines the
+    total length of the wav file and not the clicks themselves. The clicks
+    are always 80 microseconds in duration. When "impulse" is selected, a
+    single sample is set to 1 (i.e., 1/Fs in duration). Set to 0 if using
+    "custom", as this will be ignored.
 
-    f0, required for sawtooth, clicktrain, puretone; the fundamental
-        frequency for all timbres except impulse/click. Specify as 0 for click
-        and impulse if the next argument is necessary, otherwise omit.
+f0, required for sawtooth, clicktrain, puretone; the fundamental
+    frequency for all timbres except impulse/click. Specify as 0 for click
+    and impulse if the next argument is necessary, otherwise omit.
 
-    headrad, optional, specify head radius in cm for interpolation (defaults to
-        9 cm, same as csound)
+headrad, optional, specify head radius in cm for interpolation (defaults to
+    9 cm, same as csound)
+
+wavfile: path to a wav file to be processed. Only required when
+    timbre=custom
+
+SAMPLERATE: must be 44100, 48000, 96000
+
+TIMBRE: impulse, click, clicktrain, puretone, or sawtooth
+
+DURATION: duration in seconds. For clicks and impulses, this defines the
+    total length of the wav file and not the clicks themselves. The clicks
+    are always 80 microseconds in duration. When "impulse" is selected, a
+    single sample is set to 1 (i.e., 1/Fs in duration).
+
+f0, required for sawtooth, clicktrain, puretone; the fundamental
+    frequency for all timbres except impulse/click. Specify as 0 for click
+    and impulse if the next argument is necessary, otherwise omit.
+
+headrad, optional, specify head radius in cm for interpolation (defaults to
+    9 cm, same as csound)
+
+wav, required if timbre=custom. Path to a wav file to be interpolated.
 
 Notes:
 ----------
