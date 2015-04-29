@@ -28,8 +28,7 @@ usage:
         and impulse if the next argument is necessary, otherwise omit.
     headrad, optional, specify head radius in cm for interpolation (defaults to
         9 cm, same as csound)
-    wavfile: path to a wav file to be processed. Only required when
-        timbre=custom
+    wav: path to a wav file to be processed. Only required when timbre=custom.
 
 note:
 the .dat files are copies of the hrtf set included with csound and were copied
