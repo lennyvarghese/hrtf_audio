@@ -12,19 +12,24 @@ Dependencise:
     audio_tools
 
 usage:
-    python make_binaural.py SAMPLERATE TIMBRE DURATION [f0] [headrad]
+    python make_binaural.py SAMPLERATE TIMBRE DURATION [f0] [headrad] [wav]
 
     SAMPLERATE: must be 44100, 48000, 96000
-    TIMBRE: impulse, click, clicktrain, puretone, or sawtooth
+    TIMBRE: impulse, click, clicktrain, puretone, sawtooth, or custom. If
+        custom, the last argument must be specified and point to the wav file
+        to be interpolated.
     DURATION: duration in seconds. For clicks and impulses, this defines the
         total length of the wav file and not the clicks themselves. The clicks
         are always 80 microseconds in duration. When "impulse" is selected, a
-        single sample is set to 1 (i.e., 1/Fs in duration).
+        single sample is set to 1 (i.e., 1/Fs in duration). Set to 0 if using
+        "custom", as this will be ignored.
     f0, required for sawtooth, clicktrain, puretone; the fundamental
         frequency for all timbres except impulse/click. Specify as 0 for click
         and impulse if the next argument is necessary, otherwise omit.
     headrad, optional, specify head radius in cm for interpolation (defaults to
         9 cm, same as csound)
+    wavfile: path to a wav file to be processed. Only required when
+        timbre=custom
 
 note:
 the .dat files are copies of the hrtf set included with csound and were copied
@@ -88,6 +93,22 @@ elif theTimbre == 'impulse':
     audioOut = audio_tools.impulse(dur, Fs)
 elif theTimbre == 'click':
     audioOut = audio_tools.click(dur, Fs)
+elif theTimbre == 'custom':
+    try:
+        audioOut, thisFs, enc = audiolab.wavread(str(sys.argv[6]))
+        if Fs != thisFs:
+            raise AssertionError('sample rate on supplied wav file does not' +
+                                 'match sample rate specified')
+        if len(audioOut.shape) > 1:
+            raise AssertionError('custom wav file must be monaural')
+
+        dur = len(audioOut) / float(thisFs)
+
+        print(dur)
+
+    except IndexError:
+        raise(IndexError, 'when specifying timbre=custom, last argument must' +
+                          'be path to the wav file.')
 
 audioOut = audioOut / max(abs(audioOut))
 
